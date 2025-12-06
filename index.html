@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <!-- THÊM DÒNG NÀY ĐỂ TRÁNH LỖI 403 GOOGLE CHẶN -->
-    <meta name="referrer" content="no-referrer-when-downgrade">
+    <!-- QUAN TRỌNG: Để tải được ảnh từ GitHub/Server khác mà không bị chặn -->
+    <meta name="referrer" content="no-referrer">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nhân Tướng Học AI</title>
+    <title>Nhân Tướng Học & Tarot AI</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
@@ -25,6 +25,9 @@
         .animate-fade-in-up { animation: fadeInUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1); }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
+        
+        /* Hiệu ứng lật bài (nếu muốn nâng cấp sau này) */
+        .card-shadow { box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5); }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-200 selection:bg-purple-500 selection:text-white pb-10">
@@ -38,18 +41,18 @@
                         <i data-lucide="brain" class="w-5 h-5 text-white"></i>
                     </div>
                     <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-indigo-400 hidden sm:block">
-                        Nhân Tướng Học AI
+                        Nhân Tướng & Tarot AI
                     </h1>
                 </div>
                 
                 <div class="flex bg-slate-800 p-1 rounded-lg">
-                    <button id="single-mode-btn" class="px-4 py-1.5 rounded-md text-sm font-medium transition-all bg-slate-700 text-white shadow-sm">
+                    <button id="single-mode-btn" class="px-3 py-1.5 rounded-md text-sm font-medium transition-all bg-slate-700 text-white shadow-sm">
                         Cá Nhân
                     </button>
-                    <button id="couple-mode-btn" class="px-4 py-1.5 rounded-md text-sm font-medium transition-all text-slate-400 hover:text-slate-200">
-                        Tướng Phu Thê
+                    <button id="couple-mode-btn" class="px-3 py-1.5 rounded-md text-sm font-medium transition-all text-slate-400 hover:text-slate-200">
+                        Phu Thê
                     </button>
-                    <button id="tarot-mode-btn" class="px-4 py-1.5 rounded-md text-sm font-medium transition-all text-slate-400 hover:text-slate-200">
+                    <button id="tarot-mode-btn" class="px-3 py-1.5 rounded-md text-sm font-medium transition-all text-slate-400 hover:text-slate-200">
                         Tarot
                     </button>
                 </div>
@@ -62,7 +65,7 @@
 
         <main class="max-w-4xl mx-auto px-4 py-8">
             <div id="intro-section" class="text-center mb-12 animate-fade-in-up">
-                <!-- Intro content injected by JS -->
+                <!-- Nội dung Intro sẽ được JS điền vào -->
             </div>
 
             <div id="error-section" class="hidden bg-red-500/10 border border-red-500/50 text-red-200 p-4 rounded-lg mb-6 max-w-xl mx-auto animate-fade-in items-center gap-2">
@@ -115,12 +118,29 @@
             isDrawing: false,
         };
 
+        // --- HELPER: LẤY ẢNH TAROT CHUẨN ---
+        // Hàm này chuyển tên lá bài thành URL ảnh đẹp
+        const getTarotImage = (cardName) => {
+            // Chuẩn hóa tên: "The Fool" -> "the_fool"
+            let formattedName = cardName.trim().toLowerCase().replace(/\s+/g, '_');
+            
+            // Xử lý một số tên đặc biệt để khớp với kho ảnh
+            formattedName = formattedName.replace('fortune', 'wheel_of_fortune'); // Wheel of Fortune
+            formattedName = formattedName.replace('strength', 'strength');
+            formattedName = formattedName.replace('death', 'death');
+            
+            // Sử dụng kho ảnh GitHub ổn định (musharof/tarot-images)
+            return `https://raw.githubusercontent.com/musharof/tarot-images/main/images/${formattedName}.jpg`;
+        };
+
         // --- RENDER FUNCTIONS ---
         const render = () => {
-            singleModeBtn.className = `px-4 py-1.5 rounded-md text-sm font-medium transition-all ${state.mode === 'single' ? 'bg-slate-700 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'}`;
-            coupleModeBtn.className = `px-4 py-1.5 rounded-md text-sm font-medium transition-all ${state.mode === 'couple' ? 'bg-gradient-to-r from-pink-600 to-purple-600 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'}`;
-            tarotModeBtn.className = `px-4 py-1.5 rounded-md text-sm font-medium transition-all ${state.mode === 'tarot' ? 'bg-gradient-to-r from-amber-600 to-yellow-600 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'}`;
+            // Update buttons style
+            singleModeBtn.className = `px-3 py-1.5 rounded-md text-sm font-medium transition-all ${state.mode === 'single' ? 'bg-slate-700 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'}`;
+            coupleModeBtn.className = `px-3 py-1.5 rounded-md text-sm font-medium transition-all ${state.mode === 'couple' ? 'bg-gradient-to-r from-pink-600 to-purple-600 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'}`;
+            tarotModeBtn.className = `px-3 py-1.5 rounded-md text-sm font-medium transition-all ${state.mode === 'tarot' ? 'bg-gradient-to-r from-amber-600 to-yellow-600 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'}`;
             
+            // Show/Hide Error
             if (state.error) {
                 errorSection.classList.remove('hidden');
                 errorSection.classList.add('flex');
@@ -130,6 +150,7 @@
                 errorSection.classList.remove('flex');
             }
 
+            // Mode Switching Logic
             if (state.mode === 'tarot') {
                 mainInterface.classList.add('hidden');
                 introSection.classList.remove('hidden');
@@ -355,7 +376,7 @@
                 </div>`;
         };
 
-        // --- TAROT ---
+        // --- TAROT CONFIG ---
         const TAROT_CARDS = {
             MajorArcana: ["The Fool", "The Magician", "The High Priestess", "The Empress", "The Emperor", "The Hierophant", "The Lovers", "The Chariot", "Strength", "The Hermit", "Wheel of Fortune", "Justice", "The Hanged Man", "Death", "Temperance", "The Devil", "The Tower", "The Star", "The Moon", "The Sun", "Judgement", "The World"],
             Wands: ["Ace of Wands", "Two of Wands", "Three of Wands", "Four of Wands", "Five of Wands", "Six of Wands", "Seven of Wands", "Eight of Wands", "Nine of Wands", "Ten of Wands", "Page of Wands", "Knight of Wands", "Queen of Wands", "King of Wands"],
@@ -407,25 +428,42 @@
                         <p class="text-slate-400 mt-2">Đây là thông điệp vũ trụ dành cho bạn:</p>
                     </div>
 
-                    <div class="grid md:grid-cols-3 gap-6 text-center">
-                        ${result.cards.map(card => `
-                            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex flex-col items-center animate-fade-in" style="animation-delay: ${card.position === 'Quá khứ' ? '100ms' : card.position === 'Hiện tại' ? '300ms' : '500ms'}">
-                                <div class="w-24 h-40 bg-slate-800 border-2 border-slate-700 rounded-lg flex flex-col justify-center items-center mb-4 shadow-lg bg-cover bg-center" style="background-image: url('https://via.placeholder.com/150x240/1e293b/ffffff?text=${encodeURIComponent(card.name)}')">
+                    <div class="grid md:grid-cols-3 gap-8 text-center">
+                        ${result.cards.map(card => {
+                            // Tự động tìm ảnh đẹp
+                            const imgUrl = getTarotImage(card.name);
+                            return `
+                            <div class="group relative animate-fade-in" style="animation-delay: ${card.position === 'Quá khứ' ? '100ms' : card.position === 'Hiện tại' ? '300ms' : '500ms'}">
+                                <div class="relative bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col items-center hover:border-amber-500/50 transition-colors duration-300 h-full">
                                     
+                                    <!-- Card Image Container -->
+                                    <div class="w-full aspect-[2/3] rounded-lg mb-4 overflow-hidden shadow-2xl relative card-shadow">
+                                        <img src="${imgUrl}" alt="${card.name}" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500" 
+                                        onerror="this.src='https://i.pinimg.com/736x/88/c5/4c/88c54c153835f8e02d60920a233b4975.jpg'"/>
+                                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                                        <div class="absolute bottom-2 left-0 right-0 text-center">
+                                            <span class="text-xs font-bold text-amber-400 uppercase tracking-widest bg-black/50 px-2 py-1 rounded-full backdrop-blur-sm border border-amber-500/30">
+                                                ${card.position}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <h3 class="font-bold text-xl text-white mb-1">${card.name}</h3>
+                                    <p class="text-slate-400 text-sm leading-relaxed">${card.interpretation}</p>
                                 </div>
-                                <h3 class="font-bold text-lg text-white">${card.name}</h3>
-                                <p class="text-sm font-semibold text-amber-400 mb-2">${card.position}</p>
-                                <p class="text-slate-400 text-sm leading-relaxed">${card.interpretation}</p>
                             </div>
-                        `).join('')}
+                        `}).join('')}
                     </div>
 
-                    <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 animate-fade-in" style="animation-delay: 700ms">
-                        <h4 class="text-yellow-400 font-semibold mb-2 flex items-center gap-2">
-                            <i data-lucide="book-open" class="w-5 h-5"></i>
+                    <div class="bg-slate-900 p-8 rounded-2xl border border-slate-800 animate-fade-in mt-8 shadow-2xl relative overflow-hidden" style="animation-delay: 700ms">
+                         <div class="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">
+                            <i data-lucide="star" class="w-32 h-32 text-amber-500"></i>
+                        </div>
+                        <h4 class="text-amber-400 font-bold text-lg mb-4 flex items-center gap-2 relative z-10">
+                            <i data-lucide="book-open" class="w-6 h-6"></i>
                             Tổng Kết & Lời Khuyên
                         </h4>
-                        <p class="text-slate-300 leading-relaxed">${result.summary}</p>
+                        <p class="text-slate-300 leading-relaxed text-lg relative z-10">${result.summary}</p>
                     </div>
 
                     <div class="mt-8 text-center animate-fade-in" style="animation-delay: 900ms">
@@ -458,7 +496,6 @@
             }
         }
 
-        // --- LOGIC FUNCTIONS ---
         const handleImageUpload = (e, slot) => {
             const file = e.target.files[0];
             if (file) {
@@ -509,11 +546,7 @@
 
             try {
                 const base64Data1 = await fileToBase64(state.imageFile1);
-                // --- ĐÃ SỬA LẠI LOGIC CHỖ NÀY ---
-                // Trước đây bạn quên truyền base64Data2 vào hàm, nên nó bị lỗi 400
                 const base64Data2 = state.mode === 'couple' && state.imageFile2 ? await fileToBase64(state.imageFile2) : null;
-                
-                // Truyền đủ 4 tham số: Ảnh 1, Loại 1, Ảnh 2, Loại 2
                 await analyzeWithGemini(base64Data1, state.imageFile1.type, base64Data2, state.imageFile2?.type);
             } catch (err) {
                 console.error(err);
@@ -533,20 +566,24 @@
             const parts = [];
 
             if (state.mode === 'tarot') {
-                prompt = `Ê, giải bài tarot giùm. Gen Z style, đừng dài dòng.
-Câu hỏi: "${state.tarotQuestion || 'Chuyện gì đang diễn ra?'}"
-3 lá: ${state.drawnCards[0]} (quá khứ), ${state.drawnCards[1]} (hiện tại), ${state.drawnCards[2]} (tương lai).
-- Mỗi lá nghĩa là gì? Giải thích nhanh.
-- Xâu chuỗi 3 lá, cho lời khuyên chất.
-- Trả JSON, không markdown nha.
-Format:
+                prompt = `Bạn là một Tarot Reader chuyên nghiệp và cá tính (Gen Z style).
+Hãy giải bài cho câu hỏi: "${state.tarotQuestion || 'Chuyện gì đang diễn ra?'}"
+3 lá bài đã bốc là: ${state.drawnCards[0]} (Quá khứ), ${state.drawnCards[1]} (Hiện tại), ${state.drawnCards[2]} (Tương lai).
+
+Yêu cầu output JSON (không markdown):
+- "name": Tên lá bài phải giữ nguyên TIẾNG ANH CHUẨN (Ví dụ: "Ace of Wands", "The Fool", "Ten of Swords") để hệ thống tìm ảnh. Đừng dịch tên lá bài sang tiếng Việt ở trường này.
+- "position": Quá khứ / Hiện tại / Tương lai.
+- "interpretation": Giải nghĩa ngắn gọn, súc tích, trúng tim đen.
+- "summary": Lời khuyên chốt hạ.
+
+Format JSON:
 {
   "cards": [
-    {"name": "${state.drawnCards[0]}", "position": "Quá khứ", "interpretation": "Quá khứ sao..."},
-    {"name": "${state.drawnCards[1]}", "position": "Hiện tại", "interpretation": "Giờ thì..."},
-    {"name": "${state.drawnCards[2]}", "position": "Tương lai", "interpretation": "Sắp tới..."}
+    {"name": "English Name Here", "position": "Quá khứ", "interpretation": "..."},
+    {"name": "English Name Here", "position": "Hiện tại", "interpretation": "..."},
+    {"name": "English Name Here", "position": "Tương lai", "interpretation": "..."}
   ],
-  "summary": "Tóm lại là... Lời khuyên cho bạn nè."
+  "summary": "..."
 }`;
                 parts.push({ text: prompt });
             } else if (state.mode === 'single') {
@@ -567,7 +604,7 @@ Format JSON y chang vầy:
 Không thấy mặt thì báo lỗi: {"error": "Ủa mặt đâu? Up ảnh rõ mặt dùm."}`;
                 parts.push({ text: prompt });
                 parts.push({ inlineData: { mimeType: mime1, data: b64Img1 } });
-            } else { // couple
+            } else { 
                 prompt = `Check tướng phu thê giùm cặp này. Nhanh gọn, chuẩn bài, style gen Z.
 - Hai người có nét nào giống nhau, khác nhau? Soi lẹ.
 - Hợp nhau cỡ nào? Có toang không?
@@ -590,7 +627,6 @@ Format JSON y như cũ:
 
             try {
                 const response = await fetch(
-                    // Sử dụng model 2.0-flash như bạn đang dùng
                     `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
                     {
                         method: 'POST',
