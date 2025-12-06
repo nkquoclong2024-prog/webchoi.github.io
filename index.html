@@ -553,62 +553,56 @@
             const parts = [];
 
             if (state.mode === 'tarot') {
-                prompt = `Bạn là một chuyên gia giải bài Tarot. Dựa vào câu hỏi của người dùng và ba lá bài được rút (quá khứ, hiện tại, tương lai), hãy đưa ra một bài luận giải chi tiết, sâu sắc và đầy cảm hứng.
-Câu hỏi: "${state.tarotQuestion || 'Tổng quan về cuộc sống.'}"
-Lá bài Quá khứ: ${state.drawnCards[0]}
-Lá bài Hiện tại: ${state.drawnCards[1]}
-Lá bài Tương lai: ${state.drawnCards[2]}
-
-Yêu cầu:
-- Diễn giải ý nghĩa của từng lá bài trong vị trí của nó (quá khứ, hiện tại, tương lai).
-- Liên kết ý nghĩa của ba lá bài để tạo thành một câu chuyện có ý nghĩa, trả lời cho câu hỏi của người dùng.
-- Đưa ra lời khuyên mang tính xây dựng.
-- Trả về kết quả dưới dạng JSON thuần túy (không markdown):
+                prompt = `Ê, giải bài tarot giùm. Gen Z style, đừng dài dòng.
+Câu hỏi: "${state.tarotQuestion || 'Chuyện gì đang diễn ra?'}"
+3 lá: ${state.drawnCards[0]} (quá khứ), ${state.drawnCards[1]} (hiện tại), ${state.drawnCards[2]} (tương lai).
+- Mỗi lá nghĩa là gì? Giải thích nhanh.
+- Xâu chuỗi 3 lá, cho lời khuyên chất.
+- Trả JSON, không markdown nha.
+Format:
 {
   "cards": [
-    {"name": "${state.drawnCards[0]}", "position": "Quá khứ", "interpretation": "Diễn giải chi tiết ý nghĩa lá bài trong vị trí Quá khứ..."},
-    {"name": "${state.drawnCards[1]}", "position": "Hiện tại", "interpretation": "Diễn giải chi tiết ý nghĩa lá bài trong vị trí Hiện tại..."},
-    {"name": "${state.drawnCards[2]}", "position": "Tương lai", "interpretation": "Diễn giải chi tiết ý nghĩa lá bài trong vị trí Tương lai..."}
+    {"name": "${state.drawnCards[0]}", "position": "Quá khứ", "interpretation": "Quá khứ sao..."},
+    {"name": "${state.drawnCards[1]}", "position": "Hiện tại", "interpretation": "Giờ thì..."},
+    {"name": "${state.drawnCards[2]}", "position": "Tương lai", "interpretation": "Sắp tới..."}
   ],
-  "summary": "Tổng hợp ý nghĩa của toàn bộ trải bài và đưa ra lời khuyên cuối cùng cho người hỏi."
+  "summary": "Tóm lại là... Lời khuyên cho bạn nè."
 }`;
                 parts.push({ text: prompt });
             } else if (state.mode === 'single') {
-                prompt = `Bạn là một AI chuyên gia về nhân tướng học. Dựa trên các nguyên tắc nhân tướng học cổ truyền, hãy phân tích kỹ lưỡng khuôn mặt trong ảnh. Yêu cầu:
-- Phân tích một cách nghiêm túc, chi tiết và khách quan.
-- Đánh giá các bộ phận trên khuôn mặt (trán, mắt, mũi, miệng) và liên hệ chúng với các khía cạnh về trí tuệ, thần thái, tài lộc và tính cách.
-- Đưa ra những dự đoán và lời khuyên xác đáng về sự nghiệp và tình duyên.
-- Trả về kết quả dưới dạng JSON thuần túy (không dùng markdown).
-Cấu trúc JSON như sau:
+                prompt = `OK bro, soi tướng lẹ nè. Ngắn gọn, chất, đừng có sến. Phun ra JSON thôi, no markdown.
+- Mắt, mũi, miệng, trán: phán vài đường cơ bản về tính cách, tiền tài, tình duyên.
+- Sự nghiệp, tình duyên: cho vài lời khuyên chất lừ.
+- Cho điểm trên thang 100.
+Format JSON y chang vầy:
 {
-  "forehead": "Nhận xét chi tiết về vầng trán và liên hệ với trí tuệ, tiền vận.",
-  "eyes": "Phân tích thần thái của đôi mắt, liên hệ với tâm hồn và vận khí.",
-  "nose": "Đánh giá hình dáng mũi, liên hệ tới tài lộc và trung vận.",
-  "mouth": "Luận giải về khuôn miệng, liên hệ tới tính cách và hậu vận.",
-  "career": "Dự đoán và đưa ra lời khuyên về con đường sự nghiệp.",
-  "love": "Dự đoán và đưa ra lời khuyên về đường tình duyên.",
+  "forehead": "Trán này...",
+  "eyes": "Mắt này...",
+  "nose": "Mũi này...",
+  "mouth": "Miệng này...",
+  "career": "Sự nghiệp...",
+  "love": "Tình duyên...",
   "score": 85
 }
-Nếu không có mặt trong ảnh, trả về: {"error": "Không thể phát hiện khuôn mặt trong ảnh. Vui lòng sử dụng ảnh chụp chính diện và rõ nét."}`;
+Không thấy mặt thì báo lỗi: {"error": "Ủa mặt đâu? Up ảnh rõ mặt dùm."}`;
                 parts.push({ text: prompt });
                 parts.push({ inlineData: { mimeType: mime1, data: b64Img1 } });
             } else { // couple
-                prompt = `Bạn là một AI chuyên gia về nhân tướng học, chuyên phân tích tướng phu thê. Dựa trên các nguyên tắc nhân tướng học, hãy phân tích sự hòa hợp giữa hai người trong ảnh. Yêu cầu:
-- Phân tích một cách nghiêm túc và khách quan.
-- So sánh các đặc điểm trên khuôn mặt của hai người để tìm ra điểm tương đồng (tướng phu thê) và khác biệt.
-- Đánh giá mức độ hòa hợp và các điểm có thể gây xung đột trong mối quan hệ.
-- Đưa ra lời khuyên xây dựng để giúp cặp đôi hòa hợp hơn.
-- Trả về kết quả dưới dạng JSON thuần túy (không dùng markdown).
-Cấu trúc JSON như sau:
+                prompt = `Check tướng phu thê giùm cặp này. Nhanh gọn, chuẩn bài, style gen Z.
+- Hai người có nét nào giống nhau, khác nhau? Soi lẹ.
+- Hợp nhau cỡ nào? Có toang không?
+- Cho vài lời khuyên tình yêu chất, dự đoán tương lai.
+- Trả JSON thôi, đừng ghi gì thêm.
+Format JSON y như cũ:
 {
   "compatibility_score": 90,
-  "overview": "Một câu nhận xét tổng quan, chuyên môn về mức độ đẹp đôi và hòa hợp.",
-  "harmony_points": "Phân tích những điểm tương đồng, hòa hợp trên khuôn mặt tạo nên tướng phu thê.",
-  "conflict_points": "Phân tích những điểm khác biệt, có thể dẫn đến bất đồng và cách khắc phục.",
-  "love_advice": "Lời khuyên chuyên môn để xây dựng mối quan hệ bền vững.",
-  "future_prediction": "Dự đoán về tương lai của mối quan hệ dựa trên phân tích."
+  "overview": "Tổng quan nhanh về độ đẹp đôi.",
+  "harmony_points": "Điểm hợp nhau nè.",
+  "conflict_points": "Điểm dễ toang, cẩn thận.",
+  "love_advice": "Tips giữ lửa tình yêu.",
+  "future_prediction": "Chiêm nghiệm tương lai."
 }
-Nếu ảnh lỗi hoặc thiếu mặt: {"error": "Vui lòng chọn ảnh rõ mặt của cả hai người để có kết quả phân tích chính xác nhất."}`;
+Ảnh lỗi thì báo: {"error": "Up ảnh rõ mặt cả hai người nha bro."}`;
                 parts.push({ text: prompt });
                 parts.push({ inlineData: { mimeType: mime1, data: b64Img1 } });
                 parts.push({ inlineData: { mimeType: mime2, data: b64Img2 } });
@@ -616,7 +610,7 @@ Nếu ảnh lỗi hoặc thiếu mặt: {"error": "Vui lòng chọn ảnh rõ m�
 
             try {
                 const response = await fetch(
-                    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+                    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
                     {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
